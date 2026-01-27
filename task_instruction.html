@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Istruzioni task</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="flow.js"></script>
+</head>
+<body>
+    <h1>Iniziamo!</h1>
+    
+    <p style="text-align: center; max-width: 600px; line-height: 1.8;">
+        Ora inizierà la fase sperimentale.<br><br>
+        
+        <strong style="color: #fff; font-size: 1.2rem;">Per favore, esegui il compito assegnato.</strong>
+        <br><br>
+        
+        Consegna il tablet al ricercatore, Grazie!
+    </p>
+
+    <button id="btn-next" class="disabled-btn" onclick="nextStep()">PROSEGUI</button>
+</body>
+<script>
+    const btnEl = document.getElementById('btn-next');
+
+       
+        window.onload = () => {
+            setTimeout(() => {
+                btnEl.classList.remove('disabled-btn');
+                btnEl.textContent = "PROSEGUI";
+            }, 15000); // 15 secondi di attesa
+        };
+</script>
+</html>

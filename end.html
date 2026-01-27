@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Fine</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .end-card {
+            background-color: transparent;
+            width: 100%;
+            max-width: 700px;
+            margin: 0 auto;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .big-icon {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .divider {
+            height: 1px;
+            background: linear-gradient(to right, transparent, #555, transparent);
+            margin: 30px 0;
+            width: 100%;
+        }
+
+        .researcher-label {
+            font-size: 0.85rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .restart-link {
+            display: inline-block;
+            margin-top: 25px;
+            color: #777;
+            font-size: 0.9rem;
+            border-bottom: 1px dotted #777;
+            padding-bottom: 3px;
+            transition: all 0.3s;
+        }
+        .restart-link:hover {
+            color: #fff;
+            border-bottom-color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="end-card">
+        
+        <h1>Esperimento Completato!</h1>
+
+        <div class="divider"></div>
+
+        <p class="researcher-label">Area Riservata al Ricercatore</p>
+        <p style="font-size: 1rem; margin-bottom: 20px; color: #ccc;">
+            I dati sono pronti.<br>Clicca per salvare il file JSON.
+        </p>
+
+        <button onclick="scaricaDatiCompleti()">SCARICA DATI SESSIONE</button>
+        
+        <div id="msg" class="success-message">
+            File salvato con successo!
+        </div>
+
+        <br>
+        <a href="index.html" class="restart-link">Avvia una Nuova Sessione</a>
+    </div>
+
+    <script>
+        function scaricaDatiCompleti() {
+            // RECUPERO DATI BASE
+            const userId = localStorage.getItem('userId') || 'Sconosciuto';
+            const light1 = localStorage.getItem('light1_name') || 'ND';
+            const light2 = localStorage.getItem('light2_name') || 'ND';
+            const exp1 = localStorage.getItem('phase1_name') || 'ND'; 
+            const exp2 = localStorage.getItem('phase2_name') || 'ND'; 
+            
+            const anagrafica = JSON.parse(localStorage.getItem('dati_anagrafici') || '{}');
+            
+            // RECUPERO QUESTIONARI (KSS, GVAS, ecc.)
+            let keys = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.includes('risultato_step_')) {
+                    keys.push(key);
+                }
+            }
+            keys.sort((a, b) => {
+                const stepA = parseInt(a.match(/step_(\d+)_/)[1]);
+                const stepB = parseInt(b.match(/step_(\d+)_/)[1]);
+                return stepA - stepB;
+            });
+            const risultatiQuestionari = {};
+            keys.forEach(key => {
+                risultatiQuestionari[key] = JSON.parse(localStorage.getItem(key));
+            });
+
+            // RECUPERO TEMPI
+            const performanceTimes = {};
+            if(localStorage.getItem(`PERFORMANCE_TIMES_${light1}`)) {
+                performanceTimes[light1] = JSON.parse(localStorage.getItem(`PERFORMANCE_TIMES_${light1}`));
+            }
+            if(localStorage.getItem(`PERFORMANCE_TIMES_${light2}`)) {
+                performanceTimes[light2] = JSON.parse(localStorage.getItem(`PERFORMANCE_TIMES_${light2}`));
+            }
+
+            // RECUPERO INTERVISTA
+            const intervista = JSON.parse(localStorage.getItem('INTERVISTA_FINALE') || '{}');
+
+            // --- MODIFICA AGGIUNTA: RECUPERO MUNSELL ---
+            // Recuperiamo i dati salvati in pausa.html (Fase 1) e munsell_fase2.html (Fase 2)
+            const munsellP1 = JSON.parse(localStorage.getItem('MUNSELL_DATA_PHASE1') || 'null');
+            const munsellP2 = JSON.parse(localStorage.getItem('MUNSELL_DATA_PHASE2') || 'null');
+
+            // CREAZIONE OGGETTO FINALE
+            const sessioneCompleta = {
+                CONTROL_DATA: {
+                    Soggetto_ID: userId,
+                    Data_Sessione: new Date().toLocaleString(),
+                    Sequenza_Luci: `${light1} -> ${light2}`,
+                    Sequenza_Esperimenti: `${exp1} -> ${exp2}`,
+                    Luce_1: light1,
+                    Luce_2: light2
+                },
+                ANAGRAFICA: anagrafica,
+                RISULTATI_QUESTIONARI: risultatiQuestionari,
+                TEMPI_AUTOMATICI: performanceTimes,
+                INTERVISTA: intervista,
+                // NUOVA SEZIONE NEL JSON
+                MUNSELL: {
+                    Fase1: munsellP1,
+                    Fase2: munsellP2
+                }
+            };
+
+            // CREAZIONE FILE
+            const dataStr = JSON.stringify(sessioneCompleta, null, 2);
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            const nomeFile = `DATI_${userId}_${new Date().toISOString().slice(0,10)}.json`;
+            a.download = nomeFile;
+            
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            document.getElementById('msg').style.display = 'block';
+        }
+    </script>
+</body>
+</html>

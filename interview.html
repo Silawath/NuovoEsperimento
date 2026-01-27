@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Intervista Finale</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="flow.js"></script>
+    <style>
+        .scenario-box {
+            background: #333; padding: 15px; margin-bottom: 15px; 
+            border-radius: 8px; border: 1px solid #444;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .scenario-label { font-weight: bold; color: #EBCB8B; }
+        .scenario-input { 
+            width: 80px; padding: 30px; text-align: center; 
+            font-size: 1.1rem; font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Intervista Finale</h1>
+    <p style="text-align:center; color:#aaa">Domande conclusive sull'esperienza.</p>
+
+    <form id="interviewForm">
+        
+        <div class="section-title">Esperienza Generale</div>
+
+        <label>1. Come ti senti adesso che è terminato l'esperimento?</label>
+        <textarea id="q1"></textarea>
+
+        <label>2. Ti senti affaticato/a? Se sì, da cosa?</label>
+        <textarea id="q2"></textarea>
+
+        <label>3. Hai notato differenze tra le due fasi? Se sì, quali?</label>
+        <textarea id="q3"></textarea>
+
+        <label>4. (Solo se pertinente) Perché dici che la luce era diversa?</label>
+        <textarea id="q4"></textarea>
+
+        <label>5. Hai avuto fastidi oculari? (Quando e di che tipo?)</label>
+        <textarea id="q5"></textarea>
+
+        <label>6. Hai avuto altre difficoltà durante l'esperimento?</label>
+        <textarea id="q6"></textarea>
+
+        <label>7. Condizioni fisiche pre-esperimento (Caffeina/Stimolanti)?</label>
+        <textarea id="q7"></textarea>
+
+        <label>8. Che tempo c'è oggi?</label>
+        <textarea id="q8"></textarea>
+
+        <div class="section-title" style="margin-top:40px;">Valutazione Scenari Luce</div>
+        <p style="margin-bottom:20px; color:#ccc;">Dai un voto di gradimento da 1 a 10 per ciascuno scenario.</p>
+
+        <div class="scenario-box">
+            <span class="scenario-label">Scenario 1</span>
+            <input type="number" id="scen_1" class="scenario-input" min="1" max="10" placeholder="1-10">
+        </div>
+        <div class="scenario-box">
+            <span class="scenario-label">Scenario 2</span>
+            <input type="number" id="scen_2" class="scenario-input" min="1" max="10" placeholder="1-10">
+        </div>
+        <div class="scenario-box">
+            <span class="scenario-label">Scenario 3</span>
+            <input type="number" id="scen_3" class="scenario-input" min="1" max="10" placeholder="1-10">
+        </div>
+        <div class="scenario-box">
+            <span class="scenario-label">Scenario 4</span>
+            <input type="number" id="scen_4" class="scenario-input" min="1" max="10" placeholder="1-10">
+        </div>
+        <div class="scenario-box">
+            <span class="scenario-label">Scenario 5</span>
+            <input type="number" id="scen_5" class="scenario-input" min="1" max="10" placeholder="1-10">
+        </div>
+        <div class="scenario-box">
+            <span class="scenario-label">Scenario 6</span>
+            <input type="number" id="scen_6" class="scenario-input" min="1" max="10" placeholder="1-10">
+        </div>
+
+        <button type="button" onclick="saveInterview()" style="margin-top:30px; background-color:#5E81AC;">SALVA E PROSEGUI AL MUNSELL</button>
+    </form>
+
+    <script>
+        function saveInterview() {
+            // Recupero dati (usa || "" per evitare errori se vuoti)
+            const data = {
+                Q1_Feeling: document.getElementById('q1').value || "",
+                Q2_Fatigue: document.getElementById('q2').value || "",
+                Q3_Diffs: document.getElementById('q3').value || "",
+                Q4_Light: document.getElementById('q4').value || "",
+                Q5_Eyes: document.getElementById('q5').value || "",
+                Q6_Other: document.getElementById('q6').value || "",
+                Q7_Coffee: document.getElementById('q7').value || "",
+                Q8_Weather: document.getElementById('q8').value || "",
+                // NUOVI DATI SCENARI
+                Scenario_1: document.getElementById('scen_1').value || "",
+                Scenario_2: document.getElementById('scen_2').value || "",
+                Scenario_3: document.getElementById('scen_3').value || "",
+                Scenario_4: document.getElementById('scen_4').value || "",
+                Scenario_5: document.getElementById('scen_5').value || "",
+                Scenario_6: document.getElementById('scen_6').value || ""
+            };
+
+            // Validazione Opzionale (se vuoi bloccare se vuoto, scommenta qui sotto)
+            /*
+            if(data.Scenario_1 === "") {
+                alert("Per favore dai un voto almeno al primo scenario.");
+                return;
+            }
+            */
+
+            localStorage.setItem('INTERVISTA_FINALE', JSON.stringify(data));
+            
+            // Forza il passaggio alla prossima pagina definita in flow.js
+            nextStep();
+        }
+    </script>
+</body>
+</html>

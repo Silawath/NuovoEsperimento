@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Pausa</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="flow.js"></script>
+    <style>
+        .munsell-section {
+            background: #2E3440; padding: 25px; border-radius: 15px; 
+            border: 1px solid #4C566A; margin: 20px auto; width: 98%; max-width: 1100px;
+            text-align: left;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+        .munsell-section h3 { margin-top:0; color:#88C0D0; text-align:center; margin-bottom:10px; font-weight:300; font-size:1.5rem;}
+        
+        .tray-container {
+            margin-bottom: 25px; background: #3B4252; padding: 20px 15px; 
+            border-radius: 10px; border: 1px solid #434C5E;
+        }
+        .tray-label { 
+            display: block; font-size: 1.1rem; color: #EBCB8B; margin-bottom: 15px; 
+            font-weight: bold; text-transform: uppercase; letter-spacing: 1px; 
+        }
+        
+        .tiles-scroll-area {
+            overflow-x: auto; white-space: nowrap; padding-bottom: 15px;
+            scrollbar-color: #88C0D0 #2E3440; scrollbar-width: thin;
+        }
+        .tiles-row { display: inline-flex; gap: 8px; align-items: center; }
+        
+        /* --- STILE TESSERA FORZATO (CON !important) --- */
+        input.tile-input {
+            width: 60px !important; 
+            height: 60px !important;
+            padding: 0 !important; /* Rimuove padding che nasconde il numero */
+            margin: 0 0 4px 0 !important;
+            
+            text-align: center !important;
+            background: #ECEFF4 !important; /* SFONDO BIANCO/GRIGIO */
+            border: 2px solid #bbb !important;
+            color: #2E3440 !important; /* NUMERO NERO */
+            
+            border-radius: 8px !important;
+            font-size: 1.5rem !important;
+            font-weight: 800 !important;
+            
+            box-shadow: 0 4px 0px rgba(0,0,0,0.2) !important;
+            -moz-appearance: textfield !important; 
+            transition: none !important;
+        }
+        
+        input.tile-input:focus {
+            border-color: #333 !important;
+            background: #fff !important;
+            outline: none !important;
+            transform: none !important; /* Nessun movimento */
+        }
+        
+        /* TESSERA FISSA */
+        .tile-fixed {
+            width: 60px; height: 60px;
+            display: flex; align-items: center; justify-content: center;
+            background: #4C566A; 
+            color: #FFF; 
+            font-size: 1.5rem; 
+            font-weight: bold;
+            border: 3px solid #2E3440; 
+            border-radius: 8px;
+            user-select: none;
+            margin-bottom: 4px;
+            flex-shrink: 0; /* Non si schiaccia */
+        }
+
+        /* Nasconde frecce input */
+        input.tile-input::-webkit-outer-spin-button,
+        input.tile-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    </style>
+</head>
+<body>
+    <h1>Pausa</h1>
+    <p>Rilassati. Il prossimo test inizierà tra:</p>
+    
+    <div id="timer">5:00</div>
+
+    <div class="munsell-section">
+        <h3>Registrazione Munsell (Fase 1)</h3>
+        <p style="text-align:center; font-size:1rem; color:#ccc; margin-bottom:25px;">
+            Scorri orizzontalmente per vedere tutta la stecca.<br>
+            Le stecche sono precompilate con la sequenza corretta, inserisci eventuali errori dell'utente
+        </p>
+        
+        <div id="trays-wrapper"></div>
+    </div>
+
+    <button id="btn-next" class="disabled-btn" onclick="saveAndProceed()">VAI ALLA SECONDA FASE</button>
+
+    <script>
+        // LOGICA MUNSELL STANDARD
+        function getTrayData() {
+            // Stecca 1: Caposaldo 84 -> 85, 1, 2... 21 -> Caposaldo 22
+            const s1 = [85]; for(let i=1; i<=21; i++) s1.push(i);
+            const s2 = []; for(let i=22; i<=42; i++) s2.push(i);
+            const s3 = []; for(let i=43; i<=63; i++) s3.push(i);
+            const s4 = []; for(let i=64; i<=84; i++) s4.push(i);
+
+            return [
+                { label: "Stecca 1 (84 - 22)", anchorL: 84, anchorR: 22, seq: s1 },
+                { label: "Stecca 2 (21 - 43)", anchorL: 21, anchorR: 43, seq: s2 },
+                { label: "Stecca 3 (42 - 64)", anchorL: 42, anchorR: 64, seq: s3 },
+                { label: "Stecca 4 (63 - 85)", anchorL: 63, anchorR: 85, seq: s4 }
+            ];
+        }
+
+        function generateTrays() {
+            const wrapper = document.getElementById('trays-wrapper');
+            const data = getTrayData();
+            
+            data.forEach((tray, idx) => {
+                let html = `
+                <div class="tray-container">
+                    <span class="tray-label">${tray.label}</span>
+                    <div class="tiles-scroll-area">
+                        <div class="tiles-row">`;
+                
+                
+                html += `<div class="tile-fixed">${tray.anchorL}</div>`;
+
+                
+                tray.seq.forEach(num => {
+                    html += `<input type="number" class="tile-input" data-tray="${idx+1}" value="${num}">`;
+                });
+
+                
+                html += `<div class="tile-fixed">${tray.anchorR}</div>`;
+                
+                html += `</div></div></div>`;
+                wrapper.innerHTML += html;
+            });
+        }
+        generateTrays();
+
+        // TIMER
+        let timeLeft = 5 * 60; 
+        const timerEl = document.getElementById('timer');
+        const btnEl = document.getElementById('btn-next');
+
+        const interval = setInterval(() => {
+            const minutes = Math.floor(timeLeft / 60);
+            let seconds = timeLeft % 60;
+            seconds = seconds < 10 ? '0' + seconds : seconds;
+            timerEl.textContent = `${minutes}:${seconds}`;
+
+            if (timeLeft <= 0) {
+                clearInterval(interval);
+                timerEl.textContent = "00:00";
+                btnEl.classList.remove('disabled-btn');
+                btnEl.textContent = "INIZIA PROSSIMA FASE";
+                alert("La pausa è terminata!");
+            }
+            timeLeft--;
+        }, 1000);
+
+    
+        function saveAndProceed() {
+            const getSequenceStr = (idx) => {
+                const inputs = document.querySelectorAll(`input.tile-input[data-tray="${idx+1}"]`);
+                const values = Array.from(inputs).map(inp => inp.value.trim());
+                return values.join(", ");
+            };
+
+            const munsellData = {
+                seq1: getSequenceStr(0),
+                seq2: getSequenceStr(1),
+                seq3: getSequenceStr(2),
+                seq4: getSequenceStr(3)
+            };
+
+            localStorage.setItem('MUNSELL_DATA_PHASE1', JSON.stringify(munsellData));
+            nextStep();
+        }
+    </script>
+</body>
+</html>

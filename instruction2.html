@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Pausa</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="flow.js"></script>
+</head>
+<body>
+    <p>
+        <h1>
+            Esperimento terminato!
+        </h1>
+        <h4>
+            Grazie per aver partecipato!<br>
+            Gentilmente ti chiediamo di passare il dispositivo al ricercatore per il salvataggio dei dati.<br>
+        </h4>
+    </p>
+
+    <button id="btn-next" class="disabled-btn" onclick="nextStep()">PROSEGUI</button>
+    
+    <!-- <button onclick="nextStep()" class="secondary-btn">(Salta Pausa - Debug)</button> -->
+
+    <script>
+        const btnEl = document.getElementById('btn-next');
+
+       
+        window.onload = () => {
+            setTimeout(() => {
+                btnEl.classList.remove('disabled-btn');
+                btnEl.textContent = "PROSEGUI";
+            }, 15000); // 15 secondi di attesa
+        };
+    </script>
+</body>
+</html>

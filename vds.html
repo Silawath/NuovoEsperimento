@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>VDS</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="flow.js"></script>
+</head>
+<body>
+    <h1>Visual Discomfort Scale</h1>
+    <p>Valuta l'intensità dei sintomi (1 = Per niente, 5 = Estremamente)</p>
+
+    <div style="width: 100%; max-width: 800px; margin: 0 auto 10px auto; padding: 0 30px; display: flex; align-items: flex-end;">
+        <div style="flex: 1;"></div> <div style="flex: 0 0 240px; display: flex; justify-content: space-between; color: #aaa; font-weight: bold; padding: 0 10px;">
+            <span style="width:30px; text-align:center;">1</span>
+            <span style="width:30px; text-align:center;">2</span>
+            <span style="width:30px; text-align:center;">3</span>
+            <span style="width:30px; text-align:center;">4</span>
+            <span style="width:30px; text-align:center;">5</span>
+        </div>
+    </div>
+
+    <form onsubmit="event.preventDefault(); submitVDS();">
+        <div id="symptoms-container"></div>
+        <button type="submit">CONFERMA E PROSEGUI</button>
+    </form>
+
+    <script>
+        const symptoms = [
+            "Nausea", "Vertigini", "Malessere", "Sensazione di qualcosa nell'occhio",
+            "Giramento di testa", "Visione doppia", "Capogiro", "Visione poco chiara",
+            "Visione offuscata", "Visione scarsa", "Visione nebbiosa", "Difficoltà nel mettere a fuoco",
+            "Visione poco nitida", "Occhi irritati", "Necessità di strofinare gli occhi",
+            "Secchezza oculare", "Prurito agli occhi", "Bruciore agli occhi",
+            "Sbattere spesso gli occhi", "Dolore agli occhi", "Sabbia negli occhi",
+            "Pressione alla testa", "Dolore sordo alla testa", "Pesantezza alla testa",
+            "Congestione alla testa", "Pressione dietro agli occhi", "Mal di testa"
+        ];
+
+        const cont = document.getElementById('symptoms-container');
+        
+        symptoms.forEach((s, i) => {
+            cont.innerHTML += `
+            <div class="question-box" style="display:flex; align-items:center; justify-content:space-between;">
+                <div style="flex:1; font-weight:bold; margin-right:10px;">${s}</div>
+                
+                <div style="flex:0 0 240px; display:flex; justify-content: space-between; padding: 0 10px;">
+                    ${[1,2,3,4,5].map(v => `
+                        <div style="text-align:center; width:30px; display:flex; justify-content:center;">
+                            <input type="radio" name="s${i}" value="${v}" style="margin:0; transform:scale(1.5); cursor:pointer;" required>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>`;
+        });
+
+        function submitVDS() {
+            let results = {};
+
+            symptoms.forEach((s, i) => {
+                const name = `s${i}`;
+                const checkedEl = document.querySelector(`input[name="${name}"]:checked`);
+                if(checkedEl) {
+                    results[s] = checkedEl.value; 
+                }
+            });
+            
+            const stepIndex = localStorage.getItem('stepIndex');
+            const key = `risultato_step_${stepIndex}_VDS`;
+            
+            const record = {
+                valori: results,
+                fase: getCurrentLightName(), 
+                timestamp: new Date().toISOString()
+            };
+            
+   
+            localStorage.setItem(key, JSON.stringify(record));
+            
+
+            nextStep();
+        }
+    </script>
+</body>
+</html>
